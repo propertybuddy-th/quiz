@@ -77,8 +77,9 @@ body{font-family:"Segoe UI",Tahoma,sans-serif;background:#FAFAFF;min-height:100v
 <body>
 <div id="pg-intro" style="display:flex">
   <div class="logo-box"><span>PROPERTY <em>BUDDY</em></span></div>
+  <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:.4rem 1.2rem;margin-bottom:.9rem;display:inline-block;font-size:.8rem;color:rgba(255,255,255,.9);letter-spacing:.5px">&#x1F4CD; สำหรับนักศึกษา <strong>มหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต</strong></div>
   <div class="i-title">&#x1F3E0; หาหอที่ใช่<br>ด้วยไลฟ์สไตล์ของน้อง</div>
-  <div class="i-sub">พี่จะถามน้องสั้นๆ ตอบตามความจริงเลยนะ ไม่มีถูกไม่มีผิด แล้วพี่จะจับคู่หอที่เหมาะกับน้องมากที่สุดให้เอง &#x1F49C;</div>
+  <div class="i-sub">พี่จะถามน้องสั้นๆ ตอบตามความจริงเลยนะ ไม่มีถูกไม่มีผิด แล้วพี่จะจับคู่หอใกล้ มธ. รังสิตที่เหมาะกับน้องมากที่สุดให้เอง &#x1F49C;</div>
   <div class="i-list">
     <div class="i-row"><span>&#x1F4CD;</span> ระยะทางและการเดินทาง</div>
     <div class="i-row"><span>&#x1F4B0;</span> งบค่าเช่าและค่าไฟ</div>
@@ -377,89 +378,307 @@ function checkNext(){
   document.getElementById('btnNext').textContent=(STEP===STEPS.length-1)?'\u2728 \u0e14\u0e39\u0e1c\u0e25\u0e25\u0e31\u0e1e\u0e18\u0e4c':'\u0e16\u0e31\u0e14\u0e44\u0e1b \u2192';
 }
 
-function score(){
-  return Object.values(DB).map(function(d){
-    var sc=(d.seqw||3)*20;
-    var dp=parseInt(ga('dist_pref')[0])||5, dd=d.dist_tier||2;
-    sc+=(dd<=dp)?20:-(dd-dp)*18;
-    if(!has('has_car','yes')&&d.need_car) sc-=35;
-    var bud=parseInt(ga('budget')[0])||3, dt=d.price_tier||3, bd=dt-bud;
-    sc+=(bd>0)?-bd*22:(bd===0?18:8);
-    var ep=parseInt(ga('elec')[0])||3, de=d.elec_tier||3;
-    sc+=(de>ep)?-(de-ep)*14:(de===ep?10:14);
-    var cp=ga('contract')[0]||'12mo', dc=d.contract||'';
-    if(cp==='monthly'&&dc.indexOf('\u0e23\u0e32\u0e22\u0e40\u0e14\u0e37\u0e2d\u0e19')>=0) sc+=28;
-    else if(cp==='3mo'&&dc.indexOf('3')>=0) sc+=22;
-    else if(cp==='6mo'&&dc.indexOf('6')>=0) sc+=18;
-    else if(cp==='12mo') sc+=8;
-    else if(cp==='monthly') sc-=20;
-    var tp=ga('dorm_type')[0]||'any';
-    if(tp==='condo'&&d.type&&d.type.indexOf('\u0e04\u0e2d\u0e19\u0e42\u0e14')>=0) sc+=14;
-    else if(tp==='dorm'&&d.type&&d.type.indexOf('\u0e2b\u0e2d')>=0) sc+=12;
-    else if(tp==='condo'&&d.type&&d.type.indexOf('\u0e2b\u0e2d')>=0) sc-=8;
-    else if(tp==='dorm'&&d.type&&d.type.indexOf('\u0e04\u0e2d\u0e19\u0e42\u0e14')>=0) sc-=8;
-    var am=ga('amenities');
-    if(am.indexOf('none')<0){
-      if(am.indexOf('fitness')>=0)  sc+=d.has_fitness?14:-32;
-      if(am.indexOf('pool')>=0)     sc+=d.has_pool?14:-32;
-      if(am.indexOf('cowork')>=0)   sc+=d.has_cowork?14:-22;
-      if(am.indexOf('parking')>=0)  sc+=d.has_parking?10:-18;
-      if(am.indexOf('shop')>=0)     sc+=d.has_shop?8:-12;
-      if(am.indexOf('laundry')>=0)  sc+=d.has_laundry?6:-8;
-    }
-    var sec=ga('security');
-    if(sec.indexOf('any')<0){
-      if(sec.indexOf('keycard')>=0)     sc+=d.has_keycard?10:-18;
-      if(sec.indexOf('fingerprint')>=0) sc+=d.has_fingerprint?10:-18;
-      if(sec.indexOf('cctv')>=0)        sc+=d.has_cctv?10:-14;
-      if(sec.indexOf('guard')>=0)       sc+=d.has_guard?10:-18;
-    }
-    var g=ga('gender')[0]||'any';
-    if(g==='female'&&d.suit_female) sc+=12;
-    if(g==='male'&&d.suit_male) sc+=10;
-    var lw=ga('living_with')[0]||'alone';
-    if(lw==='couple') sc+=(d.suit_couple&&d.couple_ok)?22:-12;
-    if(lw==='roommate'&&d.suit_roommate) sc+=14;
-    if(has('has_pet','yes')){if(d.notsuit_pet) sc-=48; else if(d.suit_pet) sc+=28;}
-    var ns=ga('noise')[0]||'moderate';
-    if(ns==='quiet'){if(d.suit_quiet) sc+=18; if(d.notsuit_quiet) sc-=28; sc+=d.quiet?(d.quiet>=4?12:-12):0;}
-    if(has('latenight','often')&&d.suit_latenight) sc+=18;
-    var al=ga('allergy')[0]||'no';
-    if(al==='yes'){if(d.notsuit_allergy) sc-=42; else if(d.pest&&d.pest>=4) sc+=12;}
-    if(al==='mild'&&d.notsuit_allergy) sc-=18;
-    if(has('cook','yes')&&d.notsuit_cook) sc-=38;
-    var gh=ga('ghost')[0]||'no';
-    if(gh==='yes') sc+=d.ghost_ok?12:-22;
-    if(gh==='mild'&&!d.ghost_ok) sc-=8;
-    var st=ga('storage')[0]||'medium';
-    if(st==='lot'&&d.storage) sc+=d.storage.indexOf('\u0e40\u0e22\u0e2d\u0e30\u0e21\u0e32\u0e01')>=0?18:(d.storage.indexOf('\u0e19\u0e49\u0e2d\u0e22')>=0?-18:0);
-    var pm={clean:'clean',quiet:'quiet',safe:'safe',wifi:'wifi',ac:'ac',mgmt:'mgmt',value:'value',pest:'pest',location:'location',food:'food',privacy:'privacy',female:'female'};
-    ga('priorities').forEach(function(p){var k=pm[p];if(k&&d[k]!=null) sc+=d[k]*4.5;});
-    var sp=ga('special');
-    if(sp.indexOf('female_safety')>=0&&d.notsuit_female_safety) sc-=42;
-    if(sp.indexOf('upcountry')>=0&&d.suit_upcountry) sc+=14;
-    if(sp.indexOf('intl')>=0&&d.suit_intl) sc+=14;
-    if(sp.indexOf('budget_strict')>=0){if(dt<=2) sc+=22; else if(dt>=4) sc-=28; if(d.suit_budget) sc+=14; if(d.notsuit_lowbudget) sc-=28;}
-    if(sp.indexOf('comfort')>=0&&d.suit_comfort) sc+=14;
-    if(has('transport','win')&&d.has_win) sc+=7;
-    if(has('transport','grab')&&d.has_grab) sc+=7;
-    if(has('transport','shuttle')&&d.has_shuttle) sc+=7;
-    return {code:d.code,score:sc};
-  }).sort(function(a,b){return b.score-a.score;});
+function contractTier(dc){
+  if(!dc) return 5;
+  if(dc.indexOf('\u0e23\u0e32\u0e22\u0e40\u0e14\u0e37\u0e2d\u0e19')>=0) return 1;
+  if(dc.indexOf('3')>=0) return 2;
+  if(dc.indexOf('5')>=0||dc.indexOf('6')>=0) return 3;
+  if(dc.indexOf('10')>=0) return 4;
+  return 5;
 }
 
-function showResult(top){
+function score(){
+  var results=[];
+  var studentContractTier={monthly:1,'3mo':2,'6mo':3,'12mo':5}[ga('contract')[0]||'12mo']||5;
+  var bud=parseInt(ga('budget')[0])||3;
+  var am=ga('amenities');
+  var sec=ga('security');
+
+  Object.values(DB).forEach(function(d){
+    var why=[];
+
+    // ═══════════════════════════════════════════
+    // PHASE 1 — HARD FILTERS (ตัดออกทันทีถ้าไม่ผ่าน)
+    // ═══════════════════════════════════════════
+
+    // 1. สัญญาเช่า
+    var dormTier=contractTier(d.contract||'');
+    if(dormTier>studentContractTier){
+      why.push('\u0e2a\u0e31\u0e0d\u0e0d\u0e32\u0e44\u0e21\u0e48\u0e22\u0e37\u0e14\u0e2b\u0e22\u0e38\u0e48\u0e19\u0e1e\u0e2d');
+    }
+
+    // 2. งบประมาณ (เกิน 1 tier = hard cut)
+    var priceTier=d.price_tier||3;
+    if(priceTier-bud>1){
+      why.push('\u0e23\u0e32\u0e04\u0e32\u0e40\u0e01\u0e34\u0e19\u0e07\u0e1a');
+    }
+
+    // 3. สิ่งอำนวยความสะดวกที่ต้องมี
+    if(am.indexOf('none')<0){
+      if(am.indexOf('pool')>=0    && !d.has_pool)    why.push('\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2a\u0e23\u0e30');
+      if(am.indexOf('fitness')>=0 && !d.has_fitness) why.push('\u0e44\u0e21\u0e48\u0e21\u0e35\u0e1f\u0e34\u0e15\u0e40\u0e19\u0e2a');
+      if(am.indexOf('cowork')>=0  && !d.has_cowork)  why.push('\u0e44\u0e21\u0e48\u0e21\u0e35 co-work');
+      if(am.indexOf('parking')>=0 && !d.has_parking) why.push('\u0e44\u0e21\u0e48\u0e21\u0e35\u0e17\u0e35\u0e48\u0e08\u0e2d\u0e14\u0e23\u0e16');
+    }
+
+    // 4. ไม่มีรถ แต่หอต้องมีรถ
+    if(!has('has_car','yes') && d.need_car){
+      why.push('\u0e15\u0e49\u0e2d\u0e07\u0e21\u0e35\u0e23\u0e16');
+    }
+
+    // 5. เลี้ยงสัตว์ + หอไม่อนุญาต
+    if(has('has_pet','yes') && d.notsuit_pet){
+      why.push('\u0e44\u0e21\u0e48\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e2a\u0e31\u0e15\u0e27\u0e4c\u0e40\u0e25\u0e35\u0e49\u0e22\u0e07');
+    }
+
+    // 6. แพ้แมลง + หอมีปัญหาแมลงหนัก
+    if(ga('allergy')[0]==='yes' && d.notsuit_allergy){
+      why.push('\u0e2b\u0e2d\u0e21\u0e35\u0e1b\u0e31\u0e0d\u0e2b\u0e32\u0e41\u0e21\u0e25\u0e07');
+    }
+
+    // 7. ต้องทำอาหาร + หอไม่อนุญาต
+    if(ga('cook')[0]==='yes' && d.notsuit_cook){
+      why.push('\u0e2b\u0e49\u0e32\u0e21\u0e17\u0e33\u0e2d\u0e32\u0e2b\u0e32\u0e23');
+    }
+
+    // 8. อยู่กับแฟน + หอไม่อนุญาต
+    if(ga('living_with')[0]==='couple' && !d.suit_couple){
+      why.push('\u0e44\u0e21\u0e48\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e04\u0e39\u0e48\u0e23\u0e31\u0e01');
+    }
+
+    // 9. หญิงต้องการความปลอดภัยสูง + หอไม่เหมาะ
+    if(ga('special').indexOf('female_safety')>=0 && d.notsuit_female_safety){
+      why.push('\u0e44\u0e21\u0e48\u0e1b\u0e25\u0e2d\u0e14\u0e20\u0e31\u0e22\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e2b\u0e0d\u0e34\u0e07');
+    }
+
+    if(why.length>0){
+      results.push({code:d.code,name:d.name,score:-9999,eliminated:true,why:why});
+      return;
+    }
+
+    // ═══════════════════════════════════════════
+    // PHASE 2 — SOFT SCORING (บวก/ลบคะแนน)
+    // ═══════════════════════════════════════════
+    var sc=(d.seqw||3)*20;
+
+    // ระยะทาง (soft)
+    var dp=parseInt(ga('dist_pref')[0])||5, dd=d.dist_tier||2;
+    sc+=(dd<=dp)?18:-(dd-dp)*15;
+
+    // งบประมาณ (1 tier เกิน = soft penalty)
+    if(priceTier-bud===1) sc-=15;
+    else if(priceTier<bud) sc+=10;
+    else sc+=18;
+
+    // ค่าไฟ (soft)
+    var ep=parseInt(ga('elec')[0])||3, de=d.elec_tier||3;
+    sc+=(de>ep)?-(de-ep)*12:(de===ep?10:14);
+
+    // สัญญา (ยืดหยุ่นกว่าที่ต้องการ = bonus เล็กน้อย)
+    sc+=(dormTier<=studentContractTier)?10:0;
+
+    // ประเภทที่พัก (soft)
+    var tp=ga('dorm_type')[0]||'any';
+    if(tp==='condo'&&d.type&&d.type.indexOf('\u0e04\u0e2d\u0e19\u0e42\u0e14')>=0) sc+=12;
+    else if(tp==='dorm'&&d.type&&d.type.indexOf('\u0e2b\u0e2d')>=0) sc+=10;
+    else if(tp==='condo'&&d.type&&d.type.indexOf('\u0e2b\u0e2d')>=0) sc-=6;
+    else if(tp==='dorm'&&d.type&&d.type.indexOf('\u0e04\u0e2d\u0e19\u0e42\u0e14')>=0) sc-=6;
+
+    // สิ่งอำนวยความสะดวก soft (ร้านสะดวกซื้อ / ซักผ้า — ไม่ hard)
+    if(am.indexOf('shop')>=0)    sc+=d.has_shop?8:-8;
+    if(am.indexOf('laundry')>=0) sc+=d.has_laundry?5:-5;
+
+    // ความปลอดภัย (soft)
+    if(sec.indexOf('any')<0){
+      if(sec.indexOf('keycard')>=0)     sc+=d.has_keycard?8:-12;
+      if(sec.indexOf('fingerprint')>=0) sc+=d.has_fingerprint?8:-12;
+      if(sec.indexOf('cctv')>=0)        sc+=d.has_cctv?8:-10;
+      if(sec.indexOf('guard')>=0)       sc+=d.has_guard?8:-12;
+    }
+
+    // เพศ (soft)
+    var g=ga('gender')[0]||'any';
+    if(g==='female'&&d.suit_female) sc+=10;
+    if(g==='male'&&d.suit_male)     sc+=8;
+
+    // รูมเมท (soft)
+    if(ga('living_with')[0]==='roommate'&&d.suit_roommate) sc+=10;
+
+    // เสียง/บรรยากาศ (soft)
+    var ns=ga('noise')[0]||'moderate';
+    if(ns==='quiet'){if(d.suit_quiet) sc+=14; if(d.notsuit_quiet) sc-=18; sc+=d.quiet?(d.quiet>=4?10:-10):0;}
+    if(has('latenight','often')&&d.suit_latenight) sc+=14;
+
+    // กลัวผี (soft)
+    var gh=ga('ghost')[0]||'no';
+    if(gh==='yes') sc+=d.ghost_ok?10:-15;
+    if(gh==='mild'&&!d.ghost_ok) sc-=6;
+
+    // ของเยอะ (soft)
+    var st=ga('storage')[0]||'medium';
+    if(st==='lot'&&d.storage) sc+=d.storage.indexOf('\u0e40\u0e22\u0e2d\u0e30\u0e21\u0e32\u0e01')>=0?14:(d.storage.indexOf('\u0e19\u0e49\u0e2d\u0e22')>=0?-12:0);
+
+    // SEQW priorities (soft weight)
+    var pm={clean:'clean',quiet:'quiet',safe:'safe',wifi:'wifi',ac:'ac',mgmt:'mgmt',value:'value',pest:'pest',location:'location',food:'food',privacy:'privacy',female:'female'};
+    ga('priorities').forEach(function(p){var k=pm[p];if(k&&d[k]!=null) sc+=d[k]*4;});
+
+    // Special (soft)
+    var sp=ga('special');
+    if(sp.indexOf('upcountry')>=0&&d.suit_upcountry) sc+=10;
+    if(sp.indexOf('intl')>=0&&d.suit_intl) sc+=10;
+    if(sp.indexOf('budget_strict')>=0){if(priceTier<=2) sc+=18; if(d.suit_budget) sc+=10;}
+    if(sp.indexOf('comfort')>=0&&d.suit_comfort) sc+=10;
+
+    // Transport (soft)
+    if(has('transport','win')&&d.has_win) sc+=6;
+    if(has('transport','grab')&&d.has_grab) sc+=6;
+    if(has('transport','shuttle')&&d.has_shuttle) sc+=6;
+
+    results.push({code:d.code,name:d.name,score:sc,eliminated:false,why:[]});
+  });
+
+  results.sort(function(a,b){return b.score-a.score;});
+
+  // ═══════════════════════════════════════════
+  // PHASE 3 — FALLBACK: ถ้าผ่าน hard filter น้อยเกินไป
+  // ═══════════════════════════════════════════
+  var passed=results.filter(function(r){return !r.eliminated;});
+  if(passed.length<3){
+    // รวบรวม hard constraint ที่ทำให้หอถูกตัดออก
+    var elimReasons={};
+    results.filter(function(r){return r.eliminated;}).forEach(function(r){
+      r.why.forEach(function(w){elimReasons[w]=(elimReasons[w]||0)+1;});
+    });
+    var topReasons=Object.keys(elimReasons).sort(function(a,b){return elimReasons[b]-elimReasons[a];}).slice(0,3);
+    return {passed:passed, fallback:true, topReasons:topReasons, allResults:results};
+  }
+  return {passed:passed, fallback:false, topReasons:[], allResults:results};
+}
+
+function showResult(top, isFallback, topReasons, passedCount){
   showPg('pg-result');
   var codes=top.map(function(x){return x.code;});
   document.getElementById('rCount').textContent=codes.length+' \u0e41\u0e2b\u0e48\u0e07';
-  var ccH=codes.map(function(c){return '<span class="cc-code">'+c+'</span>';}).join('');
+
+  var ccH=codes.length>0
+    ? codes.map(function(c){return '<span class="cc-code">'+c+'</span>';}).join('')
+    : '<span style="font-size:.9rem;opacity:.7">\u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e2b\u0e2d\u0e17\u0e35\u0e48\u0e15\u0e23\u0e07\u0e15\u0e32\u0e21\u0e40\u0e07\u0e37\u0e48\u0e2d\u0e19\u0e44\u0e02</span>';
   document.getElementById('ccCodes').innerHTML=ccH;
-  var pH=codes.map(function(c){return '<span class="cpill">'+c+'</span>';}).join('');
+
+  var pH=codes.length>0
+    ? codes.map(function(c){return '<span class="cpill">'+c+'</span>';}).join('')
+    : '<span style="font-size:.85rem;color:#92400E">\u0e42\u0e1b\u0e23\u0e14\u0e1c\u0e48\u0e2d\u0e19\u0e40\u0e07\u0e37\u0e48\u0e2d\u0e19\u0e44\u0e02\u0e41\u0e25\u0e49\u0e27\u0e17\u0e33\u0e43\u0e2b\u0e21\u0e48</span>';
   document.getElementById('cPills').innerHTML=pH;
-  document.getElementById('buddyMsg').innerHTML=
-    '<strong>\u0e1e\u0e35\u0e48\u0e40\u0e25\u0e37\u0e2d\u0e01\u0e21\u0e32\u0e43\u0e2b\u0e49\u0e41\u0e25\u0e49\u0e27 &#x1F49C;</strong><br>'+
-    '\u0e08\u0e32\u0e01\u0e2b\u0e2d\u0e1e\u0e31\u0e01\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14\u0e43\u0e19\u0e1d\u0e32\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25 \u0e1e\u0e35\u0e48\u0e04\u0e31\u0e14\u0e21\u0e32\u0e44\u0e14\u0e49 <strong>'+codes.length+' \u0e41\u0e2b\u0e48\u0e07</strong> \u0e17\u0e35\u0e48\u0e15\u0e23\u0e07\u0e01\u0e31\u0e1a\u0e44\u0e25\u0e1f\u0e4c\u0e2a\u0e44\u0e15\u0e25\u0e4c\u0e19\u0e49\u0e2d\u0e07\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14 &#x1F3AF;<br><br>'+
-    '\u0e2a\u0e48\u0e07\u0e23\u0e2b\u0e31\u0e2a <strong>'+codes.join(', ')+'</strong> \u0e43\u0e2b\u0e49\u0e17\u0e35\u0e21\u0e07\u0e32\u0e19 Property Buddy \u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e43\u0e2b\u0e49\u0e1e\u0e35\u0e48\u0e46 \u0e2d\u0e18\u0e34\u0e1a\u0e32\u0e22\u0e23\u0e32\u0e22\u0e25\u0e30\u0e40\u0e2d\u0e35\u0e22\u0e14\u0e41\u0e15\u0e48\u0e25\u0e30\u0e2b\u0e2d\u0e43\u0e2b\u0e49\u0e19\u0e49\u0e2d\u0e07\u0e15\u0e31\u0e14\u0e2a\u0e34\u0e19\u0e43\u0e08\u0e44\u0e14\u0e49\u0e07\u0e48\u0e32\u0e22\u0e02\u0e36\u0e49\u0e19\u0e19\u0e30 &#x1F4F1;';
+
+  // ── Dynamic suggestion map ─────────────────────────────────────────────
+  var SUGGEST = {
+    '\u0e2a\u0e31\u0e0d\u0e0d\u0e32\u0e44\u0e21\u0e48\u0e22\u0e37\u0e14\u0e2b\u0e22\u0e38\u0e48\u0e19\u0e1e\u0e2d': {
+      icon:'&#x1F4C5;',
+      label:'\u0e2a\u0e31\u0e0d\u0e0d\u0e32\u0e44\u0e21\u0e48\u0e22\u0e37\u0e14\u0e2b\u0e22\u0e38\u0e48\u0e19\u0e1e\u0e2d',
+      tip:'\u0e2b\u0e2d\u0e43\u0e01\u0e25\u0e49 \u0e21\u0e18. \u0e2a\u0e48\u0e27\u0e19\u0e43\u0e2b\u0e0d\u0e48\u0e01\u0e33\u0e2b\u0e19\u0e14 12 \u0e40\u0e14\u0e37\u0e2d\u0e19 \u0e21\u0e35\u0e40\u0e1e\u0e35\u0e22\u0e07 5 \u0e41\u0e2b\u0e48\u0e07\u0e43\u0e19\u0e1d\u0e32\u0e19\u0e17\u0e35\u0e48\u0e22\u0e37\u0e14\u0e2b\u0e22\u0e38\u0e48\u0e19\u0e01\u0e27\u0e48\u0e32\u0e19\u0e31\u0e49\u0e19',
+      action:'\u0e25\u0e2d\u0e07\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e04\u0e33\u0e15\u0e2d\u0e1a\u0e40\u0e1b\u0e47\u0e19 <strong>"\u0e2a\u0e31\u0e0d\u0e0d\u0e32 6 \u0e40\u0e14\u0e37\u0e2d\u0e19"</strong> \u0e2b\u0e23\u0e37\u0e2d <strong>"\u0e2a\u0e31\u0e0d\u0e0d\u0e32 12 \u0e40\u0e14\u0e37\u0e2d\u0e19 \u0e01\u0e47\u0e44\u0e14\u0e49"</strong> \u0e41\u0e25\u0e49\u0e27\u0e17\u0e33\u0e43\u0e2b\u0e21\u0e48'
+    },
+    '\u0e23\u0e32\u0e04\u0e32\u0e40\u0e01\u0e34\u0e19\u0e07\u0e1a': {
+      icon:'&#x1F4B0;',
+      label:'\u0e23\u0e32\u0e04\u0e32\u0e40\u0e01\u0e34\u0e19\u0e07\u0e1a',
+      tip:'\u0e23\u0e32\u0e04\u0e32\u0e02\u0e2d\u0e07\u0e2b\u0e2d\u0e44\u0e21\u0e48\u0e15\u0e23\u0e07\u0e01\u0e31\u0e1a\u0e07\u0e1a\u0e17\u0e35\u0e48\u0e19\u0e49\u0e2d\u0e07\u0e15\u0e31\u0e49\u0e07\u0e44\u0e27\u0e49',
+      action:'\u0e25\u0e2d\u0e07<strong>\u0e02\u0e22\u0e31\u0e1a\u0e07\u0e1a\u0e02\u0e36\u0e49\u0e19 1 \u0e0a\u0e48\u0e27\u0e07</strong> \u0e40\u0e0a\u0e48\u0e19 \u0e08\u0e32\u0e01 5,000\u20137,000 \u0e40\u0e1b\u0e47\u0e19 7,000\u201310,000 \u0e1a\u0e32\u0e17 \u0e08\u0e30\u0e40\u0e1b\u0e34\u0e14\u0e15\u0e31\u0e27\u0e40\u0e25\u0e37\u0e2d\u0e01\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e44\u0e14\u0e49\u0e21\u0e32\u0e01'
+    },
+    '\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2a\u0e23\u0e30': {
+      icon:'&#x1F3CA;',
+      label:'\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2a\u0e23\u0e30',
+      tip:'\u0e21\u0e35\u0e40\u0e1e\u0e35\u0e22\u0e07 18 \u0e08\u0e32\u0e01 51 \u0e2b\u0e2d\u0e17\u0e35\u0e48\u0e21\u0e35\u0e2a\u0e23\u0e30 \u0e41\u0e25\u0e30\u0e2b\u0e25\u0e32\u0e22\u0e41\u0e2b\u0e48\u0e07\u0e44\u0e21\u0e48\u0e22\u0e37\u0e14\u0e2b\u0e22\u0e38\u0e48\u0e19\u0e40\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e2a\u0e31\u0e0d\u0e0d\u0e32\u0e14\u0e49\u0e27\u0e22',
+      action:'\u0e25\u0e2d\u0e07\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01 <strong>"\u0e2a\u0e23\u0e30\u0e27\u0e48\u0e32\u0e22\u0e19\u0e49\u0e33"</strong> \u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e21\u0e35 \u0e2b\u0e23\u0e37\u0e2d\u0e25\u0e2d\u0e07\u0e02\u0e22\u0e31\u0e1a\u0e2a\u0e31\u0e0d\u0e0d\u0e32\u0e40\u0e1b\u0e47\u0e19 12 \u0e40\u0e14\u0e37\u0e2d\u0e19\u0e41\u0e17\u0e19'
+    },
+    '\u0e44\u0e21\u0e48\u0e21\u0e35\u0e1f\u0e34\u0e15\u0e40\u0e19\u0e2a': {
+      icon:'&#x1F3CB;',
+      label:'\u0e44\u0e21\u0e48\u0e21\u0e35\u0e1f\u0e34\u0e15\u0e40\u0e19\u0e2a',
+      tip:'\u0e2b\u0e2d\u0e43\u0e19\u0e0a\u0e38\u0e14\u0e19\u0e35\u0e49\u0e2a\u0e48\u0e27\u0e19\u0e43\u0e2b\u0e0d\u0e48\u0e21\u0e35\u0e1f\u0e34\u0e15\u0e40\u0e19\u0e2a \u0e41\u0e15\u0e48\u0e2b\u0e2d\u0e17\u0e35\u0e48\u0e15\u0e31\u0e14\u0e2d\u0e2d\u0e01\u0e2d\u0e32\u0e08\u0e44\u0e21\u0e48\u0e21\u0e35\u0e40\u0e1e\u0e23\u0e32\u0e30\u0e15\u0e34\u0e14\u0e40\u0e07\u0e37\u0e48\u0e2d\u0e19\u0e44\u0e02\u0e2d\u0e37\u0e48\u0e19\u0e41\u0e17\u0e19',
+      action:'\u0e25\u0e2d\u0e07\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01 <strong>"\u0e1f\u0e34\u0e15\u0e40\u0e19\u0e2a"</strong> \u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e21\u0e35 \u0e2b\u0e23\u0e37\u0e2d\u0e2b\u0e32\u0e1f\u0e34\u0e15\u0e40\u0e19\u0e2a\u0e43\u0e01\u0e25\u0e49\u0e2b\u0e2d\u0e41\u0e17\u0e19\u0e44\u0e14\u0e49'
+    },
+    '\u0e44\u0e21\u0e48\u0e21\u0e35 co-work': {
+      icon:'&#x1F4DA;',
+      label:'\u0e44\u0e21\u0e48\u0e21\u0e35 Co-working',
+      tip:'\u0e2b\u0e2d\u0e2b\u0e25\u0e32\u0e22\u0e41\u0e2b\u0e48\u0e07\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2b\u0e49\u0e2d\u0e07 co-work \u0e41\u0e15\u0e48\u0e04\u0e38\u0e13\u0e20\u0e32\u0e1e\u0e2b\u0e2d\u0e2a\u0e39\u0e07 \u0e2b\u0e23\u0e37\u0e2d\u0e21\u0e35\u0e04\u0e32\u0e40\u0e1f\u0e48\u0e43\u0e01\u0e25\u0e49\u0e40\u0e04\u0e35\u0e22\u0e07\u0e41\u0e17\u0e19',
+      action:'\u0e25\u0e2d\u0e07\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01 <strong>"\u0e2b\u0e49\u0e2d\u0e07 Co-working"</strong> \u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e21\u0e35 \u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e25\u0e37\u0e2d\u0e01\u0e19\u0e31\u0e48\u0e07\u0e41\u0e1f\u0e1e\u0e23\u0e35\u0e40\u0e1e\u0e38\u0e23\u0e32\u0e30 / \u0e15\u0e33\u0e23\u0e32\u0e43\u0e19\u0e21\u0e2b\u0e32\u0e25\u0e31\u0e22\u0e41\u0e17\u0e19\u0e44\u0e14\u0e49'
+    },
+    '\u0e44\u0e21\u0e48\u0e21\u0e35\u0e17\u0e35\u0e48\u0e08\u0e2d\u0e14\u0e23\u0e16': {
+      icon:'&#x1F697;',
+      label:'\u0e44\u0e21\u0e48\u0e21\u0e35\u0e17\u0e35\u0e48\u0e08\u0e2d\u0e14\u0e23\u0e16',
+      tip:'\u0e2b\u0e2d\u0e1a\u0e32\u0e07\u0e41\u0e2b\u0e48\u0e07\u0e44\u0e21\u0e48\u0e21\u0e35\u0e44\u0e27\u0e49\u0e43\u0e19\u0e15\u0e36\u0e01 \u0e41\u0e15\u0e48\u0e21\u0e35\u0e0b\u0e2d\u0e22\u0e2b\u0e23\u0e37\u0e2d\u0e42\u0e0b\u0e19\u0e43\u0e01\u0e25\u0e49\u0e2b\u0e2d\u0e41\u0e17\u0e19',
+      action:'\u0e25\u0e2d\u0e07\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01 <strong>"\u0e17\u0e35\u0e48\u0e08\u0e2d\u0e14\u0e23\u0e16"</strong> \u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e21\u0e35 \u0e2b\u0e25\u0e32\u0e22\u0e2b\u0e2d\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e08\u0e2d\u0e17\u0e35\u0e48\u0e0b\u0e2d\u0e22\u0e43\u0e01\u0e25\u0e49'
+    },
+    '\u0e15\u0e49\u0e2d\u0e07\u0e21\u0e35\u0e23\u0e16': {
+      icon:'&#x1F6F5;',
+      label:'\u0e2b\u0e2d\u0e15\u0e49\u0e2d\u0e07\u0e21\u0e35\u0e23\u0e16\u0e40\u0e02\u0e49\u0e32\u0e16\u0e36\u0e07',
+      tip:'\u0e2b\u0e2d\u0e40\u0e2b\u0e25\u0e48\u0e32\u0e19\u0e35\u0e49\u0e2d\u0e22\u0e39\u0e48\u0e44\u0e01\u0e25\u0e40\u0e01\u0e34\u0e19\u0e44\u0e1b \u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e19\u0e49\u0e2d\u0e07\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e21\u0e35\u0e23\u0e16',
+      action:'\u0e25\u0e2d\u0e07\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e23\u0e30\u0e22\u0e30\u0e17\u0e32\u0e07\u0e40\u0e1b\u0e47\u0e19 <strong>"\u0e19\u0e49\u0e2d\u0e22\u0e01\u0e27\u0e48\u0e32 5 \u0e19\u0e32\u0e17\u0e35"</strong> \u0e2b\u0e23\u0e37\u0e2d <strong>"5\u201310 \u0e19\u0e32\u0e17\u0e35"</strong> \u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e2b\u0e2d\u0e17\u0e35\u0e48\u0e40\u0e14\u0e34\u0e19\u0e44\u0e14\u0e49'
+    },
+    '\u0e44\u0e21\u0e48\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e2a\u0e31\u0e15\u0e27\u0e4c\u0e40\u0e25\u0e35\u0e49\u0e22\u0e07': {
+      icon:'&#x1F431;',
+      label:'\u0e44\u0e21\u0e48\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e2a\u0e31\u0e15\u0e27\u0e4c\u0e40\u0e25\u0e35\u0e49\u0e22\u0e07',
+      tip:'\u0e2b\u0e2d\u0e43\u0e01\u0e25\u0e49 \u0e21\u0e18. \u0e2a\u0e48\u0e27\u0e19\u0e43\u0e2b\u0e0d\u0e48\u0e44\u0e21\u0e48\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e2a\u0e31\u0e15\u0e27\u0e4c\u0e40\u0e25\u0e35\u0e49\u0e22\u0e07 \u0e21\u0e35\u0e40\u0e1e\u0e35\u0e22\u0e07\u0e44\u0e21\u0e48\u0e01\u0e35\u0e48\u0e41\u0e2b\u0e48\u0e07\u0e17\u0e35\u0e48\u0e23\u0e31\u0e1a\u0e44\u0e14\u0e49',
+      action:'\u0e15\u0e34\u0e14\u0e15\u0e48\u0e2d\u0e17\u0e35\u0e21\u0e07\u0e32\u0e19 Property Buddy \u0e42\u0e14\u0e22\u0e15\u0e23\u0e07 \u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e43\u0e2b\u0e49\u0e1e\u0e35\u0e48\u0e0a\u0e48\u0e27\u0e22\u0e04\u0e49\u0e19\u0e2b\u0e2d\u0e17\u0e35\u0e48\u0e23\u0e31\u0e1a\u0e2a\u0e31\u0e15\u0e27\u0e4c\u0e40\u0e25\u0e35\u0e49\u0e22\u0e07\u0e04\u0e23\u0e31\u0e1a &#x1F43E;'
+    },
+    '\u0e2b\u0e2d\u0e21\u0e35\u0e1b\u0e31\u0e0d\u0e2b\u0e32\u0e41\u0e21\u0e25\u0e07': {
+      icon:'&#x1F41B;',
+      label:'\u0e2b\u0e2d\u0e21\u0e35\u0e1b\u0e31\u0e0d\u0e2b\u0e32\u0e41\u0e21\u0e25\u0e07',
+      tip:'\u0e2b\u0e2d\u0e40\u0e2b\u0e25\u0e48\u0e32\u0e19\u0e35\u0e49\u0e21\u0e35\u0e1b\u0e31\u0e0d\u0e2b\u0e32\u0e41\u0e21\u0e25\u0e07\u0e17\u0e35\u0e48\u0e23\u0e38\u0e48\u0e19\u0e1e\u0e35\u0e48\u0e23\u0e30\u0e1a\u0e38\u0e44\u0e27\u0e49\u0e44\u0e21\u0e48\u0e40\u0e2b\u0e21\u0e32\u0e30\u0e04\u0e19\u0e41\u0e1e\u0e49',
+      action:'\u0e25\u0e2d\u0e07\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e08\u0e32\u0e01 <strong>"\u0e41\u0e1e\u0e49\u0e21\u0e32\u0e01"</strong> \u0e40\u0e1b\u0e47\u0e19 <strong>"\u0e41\u0e1e\u0e49\u0e19\u0e34\u0e14\u0e2b\u0e19\u0e48\u0e2d\u0e22"</strong> \u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e43\u0e2b\u0e49\u0e2b\u0e2d\u0e17\u0e35\u0e48\u0e21\u0e35\u0e1b\u0e31\u0e0d\u0e2b\u0e32\u0e19\u0e49\u0e2d\u0e22\u0e22\u0e31\u0e07\u0e1c\u0e48\u0e32\u0e19\u0e44\u0e14\u0e49'
+    },
+    '\u0e2b\u0e49\u0e32\u0e21\u0e17\u0e33\u0e2d\u0e32\u0e2b\u0e32\u0e23': {
+      icon:'&#x1F373;',
+      label:'\u0e2b\u0e49\u0e32\u0e21\u0e17\u0e33\u0e2d\u0e32\u0e2b\u0e32\u0e23',
+      tip:'\u0e2b\u0e2d\u0e43\u0e01\u0e25\u0e49 \u0e21\u0e18. \u0e2a\u0e48\u0e27\u0e19\u0e43\u0e2b\u0e0d\u0e48\u0e44\u0e21\u0e48\u0e21\u0e35\u0e04\u0e23\u0e31\u0e27\u0e2a\u0e48\u0e27\u0e19\u0e15\u0e31\u0e27 \u0e41\u0e15\u0e48\u0e21\u0e35\u0e0b\u0e39\u0e1b\u0e40\u0e17\u0e28\u0e41\u0e25\u0e30\u0e2d\u0e32\u0e2b\u0e32\u0e23\u0e40\u0e22\u0e2d\u0e30\u0e43\u0e01\u0e25\u0e49\u0e2b\u0e2d',
+      action:'\u0e25\u0e2d\u0e07\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e08\u0e32\u0e01 <strong>"\u0e0a\u0e2d\u0e1a\u0e17\u0e33\u0e17\u0e38\u0e01\u0e27\u0e31\u0e19"</strong> \u0e40\u0e1b\u0e47\u0e19 <strong>"\u0e17\u0e33\u0e1a\u0e49\u0e32\u0e07\u0e04\u0e23\u0e31\u0e49\u0e07"</strong> \u0e40\u0e1e\u0e23\u0e32\u0e30\u0e2b\u0e2d\u0e2a\u0e48\u0e27\u0e19\u0e43\u0e2b\u0e0d\u0e48\u0e44\u0e21\u0e48\u0e21\u0e35\u0e04\u0e23\u0e31\u0e27'
+    },
+    '\u0e44\u0e21\u0e48\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e04\u0e39\u0e48\u0e23\u0e31\u0e01': {
+      icon:'&#x1F491;',
+      label:'\u0e44\u0e21\u0e48\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e04\u0e39\u0e48\u0e23\u0e31\u0e01',
+      tip:'\u0e2b\u0e2d\u0e40\u0e2b\u0e25\u0e48\u0e32\u0e19\u0e35\u0e49\u0e44\u0e21\u0e48\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e43\u0e2b\u0e49\u0e15\u0e48\u0e32\u0e07\u0e40\u0e1e\u0e28\u0e2d\u0e22\u0e39\u0e48\u0e23\u0e48\u0e27\u0e21\u0e01\u0e31\u0e19',
+      action:'\u0e15\u0e34\u0e14\u0e15\u0e48\u0e2d\u0e17\u0e35\u0e21\u0e07\u0e32\u0e19 Property Buddy \u0e42\u0e14\u0e22\u0e15\u0e23\u0e07 \u0e1e\u0e35\u0e48\u0e08\u0e30\u0e0a\u0e48\u0e27\u0e22\u0e2b\u0e32\u0e2b\u0e2d\u0e17\u0e35\u0e48\u0e23\u0e31\u0e1a\u0e04\u0e39\u0e48\u0e23\u0e31\u0e01\u0e43\u0e2b\u0e49\u0e42\u0e14\u0e22\u0e40\u0e09\u0e1e\u0e32\u0e30\u0e04\u0e48\u0e30 &#x1F49C;'
+    },
+    '\u0e44\u0e21\u0e48\u0e1b\u0e25\u0e2d\u0e14\u0e20\u0e31\u0e22\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e2b\u0e0d\u0e34\u0e07': {
+      icon:'&#x1F6E1;',
+      label:'\u0e44\u0e21\u0e48\u0e40\u0e2b\u0e21\u0e32\u0e30\u0e2b\u0e0d\u0e34\u0e07\u0e1b\u0e25\u0e2d\u0e14\u0e20\u0e31\u0e22\u0e2a\u0e39\u0e07',
+      tip:'\u0e2b\u0e2d\u0e40\u0e2b\u0e25\u0e48\u0e32\u0e19\u0e35\u0e49\u0e23\u0e38\u0e48\u0e19\u0e1e\u0e35\u0e48\u0e23\u0e30\u0e1a\u0e38\u0e27\u0e48\u0e32\u0e44\u0e21\u0e48\u0e40\u0e2b\u0e21\u0e32\u0e30\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e2b\u0e0d\u0e34\u0e07\u0e17\u0e35\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e01\u0e32\u0e23\u0e04\u0e27\u0e32\u0e21\u0e1b\u0e25\u0e2d\u0e14\u0e20\u0e31\u0e22\u0e2a\u0e39\u0e07',
+      action:'\u0e25\u0e2d\u0e07\u0e25\u0e1a <strong>"\u0e19\u0e31\u0e01\u0e28\u0e36\u0e01\u0e29\u0e32\u0e2b\u0e0d\u0e34\u0e07\u0e17\u0e35\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e01\u0e32\u0e23\u0e04\u0e27\u0e32\u0e21\u0e1b\u0e25\u0e2d\u0e14\u0e20\u0e31\u0e22\u0e2a\u0e39\u0e07"</strong> \u0e2d\u0e2d\u0e01 \u0e41\u0e25\u0e49\u0e27\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e1b\u0e23\u0e30\u0e40\u0e14\u0e47\u0e19\u0e04\u0e27\u0e32\u0e21\u0e1b\u0e25\u0e2d\u0e14\u0e20\u0e31\u0e22\u0e2d\u0e37\u0e48\u0e19 \u0e40\u0e0a\u0e48\u0e19 keycard + \u0e23\u0e1b\u0e20. 24 \u0e0a\u0e21. \u0e41\u0e17\u0e19'
+    }
+  };
+
+  var msg='';
+  if(isFallback || codes.length===0){
+    // หาเหตุผลอันดับ 1 ที่ตัดหอออกมากที่สุด
+    var top1 = topReasons[0]||'';
+    var top2 = topReasons[1]||'';
+    var s1 = SUGGEST[top1];
+    var s2 = SUGGEST[top2];
+
+    var reasonHTML = topReasons.slice(0,2).map(function(r){
+      var s=SUGGEST[r];
+      return s ? ('<span style="display:inline-block;background:#FEE2E2;color:#991B1B;border-radius:6px;padding:2px 8px;font-size:.8rem;margin:2px 2px">'+(s.icon||'')+'&nbsp;'+s.label+'</span>') : '';
+    }).join(' ');
+
+    // Dynamic suggestion จากเหตุผลอันดับ 1
+    var actionLine = s1
+      ? ('<br><br><div style="background:#FFFBEA;border-left:3px solid #F5C842;padding:.7rem 1rem;border-radius:0 8px 8px 0;font-size:.85rem;color:#78350F;line-height:1.6;">'
+        +'<strong>&#x1F4A1; \u0e1e\u0e35\u0e48\u0e41\u0e19\u0e30\u0e19\u0e33\u0e40\u0e25\u0e22:</strong><br>'
+        +s1.tip+'<br>'
+        +'&#x27A1; '+s1.action
+        +(s2 ? ('<br><br><span style="font-size:.78rem;opacity:.8">\u0e2b\u0e23\u0e37\u0e2d\u0e2d\u0e35\u0e01\u0e40\u0e07\u0e37\u0e48\u0e2d\u0e19\u0e44\u0e02: '+s2.tip+'<br>&#x27A1; '+s2.action+'</span>') : '')
+        +'</div>')
+      : '<br><br>\u0e25\u0e2d\u0e07\u0e25\u0e14\u0e40\u0e07\u0e37\u0e48\u0e2d\u0e19\u0e44\u0e02\u0e2a\u0e31\u0e01 1 \u0e02\u0e49\u0e2d \u0e41\u0e25\u0e49\u0e27\u0e17\u0e33\u0e43\u0e2b\u0e21\u0e48\u0e19\u0e30\u0e04\u0e30 &#x1F64F;';
+
+    msg = '<strong style="color:#B91C1C">&#x26A0; \u0e40\u0e07\u0e37\u0e48\u0e2d\u0e19\u0e44\u0e02\u0e40\u0e02\u0e49\u0e21\u0e40\u0e01\u0e34\u0e19\u0e44\u0e1b</strong><br>'
+        + '\u0e2b\u0e2d\u0e17\u0e35\u0e48\u0e1c\u0e48\u0e32\u0e19\u0e40\u0e07\u0e37\u0e48\u0e2d\u0e19\u0e44\u0e02\u0e08\u0e33\u0e40\u0e1b\u0e47\u0e19 (Hard Filter) \u0e21\u0e35\u0e40\u0e1e\u0e35\u0e22\u0e07 <strong>'+passedCount+' \u0e41\u0e2b\u0e48\u0e07</strong> \u0e08\u0e32\u0e01 51 \u0e2b\u0e2d\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14<br><br>'
+        + '\u0e40\u0e07\u0e37\u0e48\u0e2d\u0e19\u0e44\u0e02\u0e17\u0e35\u0e48\u0e15\u0e31\u0e14\u0e2b\u0e2d\u0e2d\u0e2d\u0e01\u0e21\u0e32\u0e01\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14: '+reasonHTML
+        + actionLine;
+  } else {
+    msg = '<strong>\u0e1e\u0e35\u0e48\u0e40\u0e25\u0e37\u0e2d\u0e01\u0e21\u0e32\u0e43\u0e2b\u0e49\u0e41\u0e25\u0e49\u0e27 &#x1F49C;</strong><br>'
+        + '\u0e1c\u0e48\u0e32\u0e19\u0e17\u0e38\u0e01\u0e40\u0e07\u0e37\u0e48\u0e2d\u0e19\u0e44\u0e02\u0e08\u0e33\u0e40\u0e1b\u0e47\u0e19 \u0e41\u0e25\u0e49\u0e27\u0e40\u0e23\u0e35\u0e22\u0e07\u0e15\u0e32\u0e21 Lifestyle \u0e44\u0e14\u0e49 <strong>'+codes.length+' \u0e41\u0e2b\u0e48\u0e07</strong> \u0e17\u0e35\u0e48\u0e15\u0e23\u0e07\u0e01\u0e31\u0e1a\u0e19\u0e49\u0e2d\u0e07\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14 &#x1F3AF;<br><br>'
+        + '\u0e2a\u0e48\u0e07\u0e23\u0e2b\u0e31\u0e2a <strong>'+codes.join(', ')+'</strong> \u0e43\u0e2b\u0e49\u0e17\u0e35\u0e21\u0e07\u0e32\u0e19 Property Buddy \u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e23\u0e31\u0e1a\u0e04\u0e33\u0e1b\u0e23\u0e36\u0e01\u0e29\u0e32\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e40\u0e15\u0e34\u0e21\u0e19\u0e30 &#x1F4F1;';
+  }
+  document.getElementById('buddyMsg').innerHTML=msg;
 }
 
 document.getElementById('btnStart').addEventListener('click',function(){showPg('pg-quiz');renderStep();});
@@ -467,7 +686,11 @@ document.getElementById('btnBack').addEventListener('click',function(){if(STEP>0
 document.getElementById('btnNext').addEventListener('click',function(){
   if(!allDone()) return;
   if(STEP<STEPS.length-1){STEP++;renderStep();}
-  else{var r=score();var n=Math.max(5,Math.ceil(r.length*0.1));showResult(r.slice(0,n));}
+  else{
+    var res=score();
+    var n=Math.max(5,Math.ceil((res.passed.length||res.allResults.length)*0.1));
+    showResult(res.passed.slice(0,n), res.fallback, res.topReasons, res.passed.length);
+  }
 });
 document.getElementById('btnRetake').addEventListener('click',function(){ANS={};STEP=0;showPg('pg-intro');});
 
